@@ -1,13 +1,11 @@
 name: Tag and publish
 
+# Fork-safe: only run manually via Actions tab
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   update_badges:
-    if: github.repository == 'AllenNeuralDynamics/aind-data-transfer-lite'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -15,7 +13,7 @@ jobs:
         with:
           ref: ${{ env.DEFAULT_BRANCH }}
           fetch-depth: 0
-          token: ${{ secrets.SERVICE_TOKEN }}
+          # removed token to avoid errors in fork
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
@@ -68,14 +66,11 @@ jobs:
           add: '["README.md"]'
 
   tag:
-    if: github.repository == 'AllenNeuralDynamics/aind-data-transfer-lite'
     needs: update_badges
     uses: AllenNeuralDynamics/aind-github-actions/.github/workflows/tag.yml@main
-    secrets:
-      SERVICE_TOKEN: ${{ secrets.SERVICE_TOKEN }}
+    # removed secrets to avoid errors in fork
 
   publish:
-    if: github.repository == 'AllenNeuralDynamics/aind-data-transfer-lite'
     needs: tag
     runs-on: ubuntu-latest
     steps:
@@ -93,5 +88,4 @@ jobs:
           twine check dist/*
       - name: Publish on PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.AIND_PYPI_TOKEN }}
+        # removed secrets to avoid errors in fork
