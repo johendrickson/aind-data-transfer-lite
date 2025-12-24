@@ -39,33 +39,33 @@ jobs:
           pip install pyinstaller
 
       - name: Build executable (PyInstaller)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
-          pyinstaller \
-            --name aind-data-transfer-lite-ui \
-            --windowed \
-            src/aind_data_transfer_lite/ui.py
+          pyinstaller --name aind-data-transfer-lite-ui --windowed src\aind_data_transfer_lite\ui.py
+
+      - name: Build executable (PyInstaller) - Linux/macOS
+        if: matrix.os != 'windows-latest'
+        run: |
+          pyinstaller --name aind-data-transfer-lite-ui --windowed src/aind_data_transfer_lite/ui.py
 
       # ---- Package per OS ----
 
       - name: Zip app bundle (Windows)
         if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
-          powershell Compress-Archive `
-            dist\aind-data-transfer-lite-ui `
-            aind-data-transfer-lite-ui-windows.zip
+          Compress-Archive -Path dist\aind-data-transfer-lite-ui -DestinationPath aind-data-transfer-lite-ui-windows.zip
 
       - name: Zip app bundle (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          ditto -c -k --sequesterRsrc --keepParent \
-            dist/aind-data-transfer-lite-ui \
-            aind-data-transfer-lite-ui-macos.zip
+          ditto -c -k --sequesterRsrc --keepParent dist/aind-data-transfer-lite-ui aind-data-transfer-lite-ui-macos.zip
 
       - name: Zip app bundle (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          zip -r aind-data-transfer-lite-ui-linux.zip \
-            dist/aind-data-transfer-lite-ui
+          zip -r aind-data-transfer-lite-ui-linux.zip dist/aind-data-transfer-lite-ui
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
